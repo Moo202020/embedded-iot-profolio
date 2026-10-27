@@ -53,3 +53,7 @@ BEng Electrical and Automation Engineering, HAMK. Professional experience includ
 ## Rights and attribution
 
 No blanket open-source licence is assigned to historical coursework or group material. Retained library headers and dependencies have their own licences. Review team/course permissions before publishing shared source. See [PROVENANCE.md](PROVENANCE.md).
+
+## Portfolio website
+
+The `public/` folder contains a responsive static portfolio. `wrangler.jsonc` configures Cloudflare Workers static assets. See [upload instructions](UPLOAD_TO_GITHUB.md).
