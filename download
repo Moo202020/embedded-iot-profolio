@@ -1,0 +1,11 @@
+.DS_Store
+.pio/
+build/
+__pycache__/
+*.pyc
+secrets.h
+arduino_secrets.h
+config.local.h
+.env
+.env.*
+!.env.example

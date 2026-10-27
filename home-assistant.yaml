@@ -1,0 +1,19 @@
+# Merge into an existing mqtt section; do not create duplicate top-level keys.
+# Requires Home Assistant MQTT integration connected to the same local broker.
+mqtt:
+  - binary_sensor:
+      - name: "Room light output"
+        unique_id: mohsen_room_light_output
+        state_topic: "mohsen/room-light/state"
+        value_template: "{{ value_json.light }}"
+        payload_on: "ON"
+        payload_off: "OFF"
+        availability_topic: "mohsen/room-light/availability"
+      - name: "Room PIR motion"
+        unique_id: mohsen_room_pir
+        device_class: motion
+        state_topic: "mohsen/room-light/state"
+        value_template: "{{ 'ON' if value_json.motion else 'OFF' }}"
+        payload_on: "ON"
+        payload_off: "OFF"
+        availability_topic: "mohsen/room-light/availability"
