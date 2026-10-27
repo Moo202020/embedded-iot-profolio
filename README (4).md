@@ -1,28 +1,28 @@
-# ESP32 motion-controlled lighting
+# Digital white stick distance prototype
 
-My described personal project turns room lighting on with PIR motion and off after four minutes without motion, with phone monitoring. This folder provides a NEW reference implementation of that behaviour; it is not a recovery of my original source. The Home Assistant/MQTT integration here is a new implementation choice, not a claim about the original cloud service.
+HAMK group work with Karim Ghosn, Mohsen Fadaee and Jack Awcock. Educational sensing prototype, not a validated assistive device.
 
-## Hardware and setup
+`archive/Continuous_final.ino` retains supplied historical logic with connection literals removed. `DistanceMonitor/` is a new refactor. Original behaviour sounded above 150 mm; the refactor deliberately sounds at or below 150 mm and stops at or above 180 mm to demonstrate proximity warning with hysteresis. Do not present that change as the original behaviour.
 
-- Example target: classic ESP32 DevKit; adapt the pins for your actual module. ESP32 GPIO is 3.3 V logic.
-- PIR OUT → GPIO27, GND → common GND; use a PIR supply and output level compatible with the board.
-- GPIO26 → current-limited LED or appropriate low-voltage driver input. Never drive a relay coil or mains load directly from GPIO.
-- Install Espressif ESP32 board support and **PubSubClient** by Nick O'Leary in Arduino IDE.
-- Open `HomeLighting/HomeLighting.ino`. Copy `secrets.example.h` to `secrets.h` beside it and enter local Wi-Fi/broker configuration.
-- Configure the same MQTT broker in Home Assistant and merge `home-assistant.yaml`. These are status sensors; remote output commands are intentionally not implemented.
-- Use a secured Home Assistant remote-access method if phone access outside your LAN is required. The firmware's MQTT connection is unencrypted and intended only for an isolated trusted local network. It does not provide cloud TLS.
+## Hardware
 
-## Behaviour
+Use a WiFiNINA-compatible board, a compatible VL53L0X breakout and a suitable piezo buzzer/driver. The original board model is not confirmed. A Nano 33 IoT is one possible target, but it is 3.3 V logic; breakout voltage compatibility and pin mapping must be checked.
 
-Startup output is OFF. A HIGH PIR signal turns it on and refreshes the timer on each loop. After the last HIGH sample it stays on for 240,000 ms. The PIR's own hold time and warm-up behaviour affect the physical delay. Unsigned subtraction handles the millis counter wrapping as long as updates continue regularly. MQTT reconnect attempts use intervals; individual networking library calls can still block and should be measured on hardware.
+| Function | Example connection |
+| --- | --- |
+| VL53L0X SDA/SCL | Board-labelled SDA/SCL pins |
+| Sensor GND | Common ground |
+| Sensor supply | Per breakout datasheet, compatible with board |
+| Buzzer signal | Digital pin 9 through a suitable interface if needed |
 
-## Bench checklist
+Install **VL53L0X** by Pololu, **WiFiNINA**, and **ThingSpeak**. Open `DistanceMonitor/DistanceMonitor.ino`; copy `secrets.example.h` to `secrets.h` and set your private configuration. Enable field 8 in your own ThingSpeak channel. The default channel zero disables uploads. This reference uses the library's plain WiFiClient path; it is not a TLS-secured cloud implementation.
 
-1. Start with an LED only. Verify OFF at boot and ON on motion.
-2. Set the PIR to a short hardware hold time. Check OFF four minutes after its output returns LOW.
-3. Trigger motion again before timeout and verify the countdown refreshes.
-4. Disconnect Wi-Fi and verify local control continues; reconnect and check updated status.
-5. Stop the broker; verify recovery and availability behaviour. Check the dashboard after a device power loss.
-6. Verify your actual active-high/active-low output interface before attaching any load.
+## Verification
 
-Status: host timer tests supplied; ESP32 compilation, Home Assistant integration and hardware tests pending.
+- At startup check sensor detection and invalid-read reporting.
+- Move a target through 150 mm and 180 mm and check hysteresis.
+- Disconnect the sensor and confirm timeout reporting and silent output. A silent fault is NOT a fail-safe mobility warning.
+- Confirm field 8 updates and inspect HTTP status; verify reconnect after Wi-Fi loss.
+- Check that the buzzer remains responsive during cloud requests. The API can block; this design does not guarantee bounded alarm latency.
+
+Status: host alarm logic tested; board compilation, range calibration and cloud/hardware validation pending.
